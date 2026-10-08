@@ -1,0 +1,190 @@
+"""
+Pydantic schemas for HeartGuard request validation and response models.
+"""
+
+from typing import Literal, Optional, List, Dict, Any
+from pydantic import BaseModel, Field, field_validator
+
+
+class HeartAssessmentRequest(BaseModel):
+    """
+    Input schema for heart disease risk assessment.
+    All fields are strictly validated against valid physiological and clinical boundaries.
+    """
+    age: int = Field(
+        ...,
+        ge=18,
+        le=120,
+        description="Patient age in years (18-120)",
+        examples=[54]
+    )
+    sex: Literal["M", "F"] = Field(
+        ...,
+        description="Biological sex ('M' for Male, 'F' for Female)",
+        examples=["M"]
+    )
+    chest_pain_type: Literal["ASY", "ATA", "NAP", "TA"] = Field(
+        ...,
+        description=(
+            "Chest pain type: "
+            "ASY (Asymptomatic), ATA (Atypical Angina), "
+            "NAP (Non-Anginal Pain), TA (Typical Angina)"
+        ),
+        examples=["ASY"]
+    )
+    resting_bp: float = Field(
+        ...,
+        ge=60.0,
+        le=250.0,
+        description="Resting blood pressure in mmHg (60-250)",
+        examples=[130.0]
+    )
+    cholesterol: float = Field(
+        ...,
+        ge=0.0,
+        le=700.0,
+        description="Serum cholesterol in mg/dL (0-700). 0 indicates unmeasured in clinical records.",
+        examples=[220.0]
+    )
+    fasting_bs: int = Field(
+        ...,
+        ge=0,
+        le=1,
+        description="Fasting blood sugar indicator (1 if fasting blood sugar > 120 mg/dL, 0 otherwise)",
+        examples=[0]
+    )
+    resting_ecg: Literal["Normal", "LVH", "ST"] = Field(
+        ...,
+        description=(
+            "Resting electrocardiogram results: "
+            "Normal, LVH (Left Ventricular Hypertrophy), ST (ST-T wave abnormality)"
+        ),
+        examples=["Normal"]
+    )
+    max_hr: float = Field(
+        ...,
+        ge=50.0,
+        le=230.0,
+        description="Maximum heart rate achieved in bpm (50-230)",
+        examples=[145.0]
+    )
+    exercise_angina: Literal["N", "Y"] = Field(
+        ...,
+        description="Exercise-induced angina ('N' for No, 'Y' for Yes)",
+        examples=["N"]
+    )
+    oldpeak: float = Field(
+        ...,
+        ge=-3.0,
+        le=7.0,
+        description="ST depression induced by exercise relative to rest (-3.0 to 7.0)",
+        examples=[1.0]
+    )
+    st_slope: Literal["Up", "Flat", "Down"] = Field(
+        ...,
+        description="Slope of the peak exercise ST segment ('Up', 'Flat', 'Down')",
+        examples=["Flat"]
+    )
+
+    @field_validator("resting_bp")
+    @classmethod
+    def validate_bp(cls, v: float) -> float:
+        if v < 60 or v > 250:
+            raise ValueError("Resting blood pressure must be between 60 and 250 mmHg.")
+        return v
+
+    @field_validator("max_hr")
+    @classmethod
+    def validate_max_hr(cls, v: float) -> float:
+        if v < 50 or v > 230:
+            raise ValueError("Maximum heart rate must be between 50 and 230 bpm.")
+        return v
+
+
+class ClinicalObservation(BaseModel):
+    category: str
+    finding: str
+    status: Literal["normal", "borderline", "elevated"]
+    description: str
+
+
+class PredictionResponse(BaseModel):
+    """
+    Standardized response returned by the prediction API.
+    """
+    prediction: int = Field(
+        ...,
+        description="Predicted class (0: Lower Estimated Risk, 1: Elevated Estimated Risk)"
+    )
+    risk_level: str = Field(
+        ...,
+        description="Human-readable risk level: 'Lower Estimated Risk' or 'Elevated Estimated Risk'"
+    )
+    risk_category: str = Field(
+        ...,
+        description="Risk tier: 'Low', 'Moderate', or 'High'"
+    )
+    probability: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Model estimated probability of elevated cardiovascular risk"
+    )
+    confidence_percentage: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Probability expressed as a percentage"
+    )
+    model_name: str = Field(
+        default="K-Nearest Neighbors Classifier (k=5)",
+        description="Underlying machine learning model algorithm"
+    )
+    neighbor_votes: Dict[str, int] = Field(
+        ...,
+        description="Breakdown of votes from the k=5 nearest clinical training cases"
+    )
+    clinical_observations: List[ClinicalObservation] = Field(
+        default_factory=list,
+        description="Objective clinical risk indicators observed in the patient input"
+    )
+    explanation: str = Field(
+        ...,
+        description="Methodological explanation of how the estimate was generated"
+    )
+    submitted_values: Dict[str, Any] = Field(
+        ...,
+        description="Mirror of normalized input data for verification"
+    )
+    disclaimer: str = Field(
+        default=(
+            "This application provides an educational risk estimate generated by a machine-learning model. "
+            "It is not a medical diagnosis and should not replace professional medical advice, examination, "
+            "or testing. If you have symptoms or concerns about your heart health, consult a qualified healthcare professional."
+        ),
+        description="Standard medical disclaimer"
+    )
+
+
+class HealthResponse(BaseModel):
+    status: str
+    model_loaded: bool
+    scaler_loaded: bool
+    encoder_loaded: bool
+    model_type: str
+    features_count: int
+    version: str
+
+
+class ModelFeatureMetadata(BaseModel):
+    id: str
+    label: str
+    category: str
+    unit: Optional[str]
+    type: Literal["number", "select"]
+    options: Optional[List[Dict[str, str]]] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
+    step: Optional[float] = None
+    default: Any
+    description: str
