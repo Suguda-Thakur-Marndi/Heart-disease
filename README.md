@@ -3,6 +3,20 @@
 > **Heart Disease Risk Prediction System**  
 > Assess cardiovascular risk using a machine-learning model trained on clinical health indicators.
 
+[![Live Web Application](https://img.shields.io/badge/Live_Demo-heart--disease--gold.vercel.app-00df81?style=for-the-badge&logo=vercel&logoColor=white)](https://heart-disease-gold.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://heart-disease-gold.vercel.app/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://heart-disease-gold.vercel.app/)
+
+<p align="center">
+  <a href="https://heart-disease-gold.vercel.app/" target="_blank" rel="noopener noreferrer">
+    <img src="assets/preview.png" alt="HeartGuard Live Application Preview" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  🔗 <b><a href="https://heart-disease-gold.vercel.app/" target="_blank" rel="noopener noreferrer">Click here or on the image above to launch the live application (heart-disease-gold.vercel.app)</a></b>
+</p>
+
 ---
 
 ## 1. Overview
@@ -22,6 +36,12 @@ The system is designed with a strict medical ethics framework: it provides proba
 - **Zero Server Telemetry Logging**: User health assessments are stored strictly inside the browser's private `localStorage`.
 - **Interactive Risk Dashboard**: Visualizes assessment metrics and risk score trajectories using Recharts.
 - **Strict Medical Safety**: Prominent medical disclaimers and emergency consultation advisories throughout the interface.
+
+<p align="center">
+  <a href="https://heart-disease-gold.vercel.app/" target="_blank" rel="noopener noreferrer">
+    <img src="assets/assessment.png" alt="HeartGuard Clinical Assessment Interface" width="100%" />
+  </a>
+</p>
 
 ---
 
