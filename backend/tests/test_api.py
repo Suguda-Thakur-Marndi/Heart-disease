@@ -29,6 +29,22 @@ def test_health_endpoint(client):
     assert data["features_count"] == 14
 
 
+def test_api_health_endpoint(client):
+    """Verify /api/health alias for Vercel multi-service routing."""
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["model_loaded"] is True
+
+
+def test_main_wrapper_entrypoint():
+    """Verify backend/main.py properly exports the FastAPI app instance."""
+    import main
+    assert hasattr(main, "app")
+    assert main.app.title == "HeartGuard API"
+
+
 def test_model_info_endpoint(client):
     """Verify model-info endpoint returns complete metadata for the UI."""
     response = client.get("/api/model-info")

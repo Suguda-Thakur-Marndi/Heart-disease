@@ -47,9 +47,20 @@ app = FastAPI(
     description="Machine Learning API for Cardiovascular Risk Estimation",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
+
+@app.get("/docs", include_in_schema=False)
+async def docs_redirect():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/api/docs")
+
+@app.get("/openapi.json", include_in_schema=False)
+async def openapi_redirect():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/api/openapi.json")
 
 # CORS Configuration
 allowed_origins = [
@@ -118,6 +129,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 
 
 @app.get("/health", response_model=HealthResponse)
+@app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     """
     Health check endpoint verifying model readiness.
@@ -135,6 +147,7 @@ async def health_check():
 
 
 @app.post("/api/predict", response_model=PredictionResponse)
+@app.post("/predict", response_model=PredictionResponse)
 async def predict_risk(request: HeartAssessmentRequest):
     """
     Executes cardiovascular risk prediction based on submitted health parameters.
@@ -143,6 +156,7 @@ async def predict_risk(request: HeartAssessmentRequest):
 
 
 @app.get("/api/model-info")
+@app.get("/model-info")
 async def get_model_info():
     """
     Returns clinical input specifications dynamically derived from the trained model.
